@@ -1,0 +1,433 @@
+
+% \documentclass{article}
+\documentclass[a4paper]{article}
+\usepackage[left=0.2cm, right=0.2cm, top=0.2cm, bottom=0.2cm]{geometry}
+% \usepackage[left=0.4cm, right=0.4cm, top=0.4cm, bottom=0.4cm]{geometry}
+\usepackage{tikz}
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+            \node[shape=circle,draw,inner sep=0.5pt] (char) {#1};}}
+\usepackage{multicol}
+\usepackage{amssymb}
+\usepackage{amssymb}
+
+\usepackage{mathtools, nccmath, textcomp}
+\usepackage[onehalfspacing]{setspace}
+\linespread{0}
+\begin{document}
+\textbf{1. Viola Jones Face detection}-Feature Extraction(harr like)\&Classification,\textit{no need to consider conv with inv}\\
+Feat.Ext.-1.Kernels(-+edge,-+-line,$\frac{-+}{+-}$4rect feat)2.Convolution with scaled masks3.Descriptor-24x24-160K size\\
+\textit{Training} - \circled{1} 5K +\&-ve(hard -ve, nonface)24x24imgs\circled{2} Feat. Ext. - 10K des. of 160K len. \circled{3} Classification . \textit{Adaboost}\\
+\textit{Adaboost} - \circled{1}Strong classifier=combine a lot of weak classifiers\circled{2}160K feat=160K weak classifiers $h_i$\circled{3}Wrongly classified = more weight
+$[w_{t}_{i} = 1/2m]$ - m-no. of faces, i - index of the image, t- index of the descriptor-\textbf{Training}$\circled{1}Normalise- W_{t, i}={W_{t,i}}/{\sum_{j=1}^{N} W_{t,j}}$\circled{2}best weak classifier-$
+\varepsilon_{t}=\min _{\{\theta\}} \sum_{i=1}^{N} \omega_{t, i}\left|h\left(x_{i}, \theta\right)-y_{i}\right|
+$ \circled{3}
+$\omega_{t+1, i}=\omega_{t, i} \beta_{t}^{\left(1-\alpha_{i}\right)}, \alpha_{i}=0$,if correctly classified
+\circled{4}Strong classifier - $
+\text { if }\\ \sum_{t=1}^{T} \gamma_{t} h_{t}\left(x_{test}\right) \geq \frac{1}{2} \sum_{t}^{T} \gamma_{t}
+$ where, $
+\gamma_{t}=\log \frac{1}{\beta_{t}}
+$.
+\textit{Testing} - Increase size by 1.25 & check,\textit{Integral image} $
+ii(x,y) &=i i(x-1,y)+s(x, y);  s(x,y) &=s(x,y-1)+i(x,y)
+$, Cascade of weak classifiers -stage consists of few weak'
+, reject non-faces soon.-start 2feature strong classifier, minimise false negatives-lower threshold - high detection rates & false +ve rates\\
+\indent\textbf{2. Features}- pixel intensity not reliable- feature; light, occlusion, angle = Feature - gradient, HoG, SIFT etc.\circled{1}\textit{HOG}-Oriented gradient-vectore $
+m=\sqrt{I_{x}^{2}+I_{y}^{2}},
+\theta=\tan ^{-1}\left(\frac{|I_{y}|}{|I_{x}|}\right)$ - angle is oriented w.r.t to the signs of $I_{x} & I_{y}$ - note y is from top to bottom of image\\
+\indent\textbf{3. SIFT}\circled{1}\textit{Scale Space Extrema}-
+no.of octaves = 4, number of scale levels = 5, initial$\sigma=1.6, k=\sqrt{2}$  scale space= L(x, y, $\sigma$), don't confuse with scale in $\sigma$ with image resizing, DoG is subtracting each guassian scale images, 5 scale levels=4 DoG images, extrema found within the octave for different guassian scales, 2nd octave - resample Gaussian image - 2$\sigma$(2 image from top) evry 2nd pxl in r and c. \textit{DoG - difference of gaussian}-$
+I *\left(G_{\theta_{1}}-G_{\theta_{2}}\right)$
+\textit{LoG - Laplacian of gaussian}-$\Delta G=\nabla^{2} G=\nabla \cdot \nabla G = \frac{\partial^{2} G}{\partial x^{2}}+\frac{\partial^{2} G}{\partial y^{2}}; LOG(I)=I * \Delta G$
+\circled{2}\textit{Keypoint Localisation} - fit nearby for location, scale, and ratio of principal curvatures \circled{2.1}\textit{ContrastThres}
+1. Noise correction - $Taylor - f(x)=f(a)+f^{\prime}(a)(x-a)+\frac{f^{\prime \prime}(x-a)}{2 !}(x-a)^{2}+\ldots;
+D(\mathbf{x})=D+\frac{\partial D}{\partial \mathbf{x}}^{T} \mathbf{x}+\frac{1}{2} \mathbf{x}^{\mathbf{T}} \frac{\partial^{2} D}{\partial \mathbf{x}^{2}} \mathbf{x};
+\left.\frac{\partial D(\bar{x})}{\partial \bar{x}}\right|=\left[\begin{array}{c}{\partial \mathbb{D} / \partial x} \\ {\partial \mathbb{D} / \partial y}\end{array}\right] ;
+\left.\frac{\partial^{2}D(\bar{x})}{\partial \bar{x}^{2}}=\frac{\partial D'^{T}(\bar{x})}{\partial \bar{x}};
+, \hat{\mathbf{x}}=-\frac{\partial^{2} D}{\partial \mathbf{x}^{2}}^{-1} \frac{\partial D}{\partial \mathbf{x}}$ ind. for x=0, use $\hat{\mathbf{x}}>0.5$
+2. Contrast if $|D(\hat{\mathbf{x}})|=|D+\frac{1}{2} \frac{\partial D^{T}}{\partial \mathbf{x}} \hat{\mathbf{x}}| < 0.03$, reject.
+ \circled{2.2}
+ \textit{edgeThres}
+pca frm 2x2 Hessian matrix, eigenvalues of H &\proposition& pca ratio of D;
+ $\frac{\operatorname{Tr}(\mathbf{H})^{2}}{\operatorname{Det}(\mathbf{H})}=\frac{(\alpha+\beta)^{2}}{\alpha \beta} = \frac{(r+1)^{2}}{r}$, r$<$10 is accepted
+\circled{3}\textit{Orientation Assignment}
+Orientation histogram, 36 bins, 4x4 size, weighted by gradient magnitude and gaussian-weighted circular window, $\sigma$ =1.5*scale of keypoint, highest peak in the histogram is taken and any peak above $80\%$ also, calculate the orientation. $>1$ keypoints with same location and scale, but different directions=more stability
+\circled{4}\textit{Descriptor}
+gradient(keypoint) m&$\theta$, rotated w.r.t keypoint orientation, weighted - guass, smoothly-avoid sudden changes in desc.. ;normalized to unit length=descriptor invariant- affine changes in illumination, non-linear illumination-3D surfaces- differing orientations- change relative magnitudes for some gradients - thresholding the values in the unit feature vector to each be no larger than 0.2(experiment)-imp to distribution than value, and then renormalizing to unit length-16x16 around keypoint - 16 sub-blks(8 bins each) of 4x4 = 128bin - feature descriptor of the keypoint
+\circled{5}\textit{Matching}
+\textit{Homography} - to get translation into, $
+\bar{x}^{\prime}=\mathbb{H} \bar{x}
+$
+1. Euclidian-rot&trans 2. Similarity-scaling 3. Affine - shearing, 4.Projective - collinearity(aBc)-violated in differnt plane, concurrency (abcd)
+$
+\left[\begin{array}{ccccccccc}{x} & {y} & {1} & {0} & {0} & {0} & {-x’x}&{-x’ y} & {-x^{1}} \\ {0} & {0}&{0} & {x}&{y}&{1} & {-y^{\prime} x} & {-y^{\prime} y} & {-y^{\prime}}\end{array}\right][h]=0
+$;
+$
+A=UDV^{\top} \rightarrow \bar{h} \text { last row of } V^{\top}
+$;
+$
+\bar{q}=V^{\top} \bar{p}
+$;
+$
+\mathbb{D} \vec{q}=\left[\begin{array}{ll}{\alpha_{1}} & {0} \\ {0} & {\alpha_{2}}\end{array}\right]\left[\begin{array}{l}{q_{x}} \\ {q_{y}}\end{array}\right]=\left[\begin{array}{l}{0} \\ {0}\end{array}\right]
+$
+$
+\alpha_{1} \geq \alpha_{2}
+$;
+$
+\min |A \vec{p}|=\min |D\vec{q}|
+$;
+$
+\bar{q}=[0,0, \ldots,1]^{\top}
+$;
+$
+\bar{p}=V \bar{q}
+$;
+\circled{6}\textit{RANSAC}
+1. Select n>5 matched pairs (dist of 1st/2nd<0.8-rejected eliminates 90$\%$ false matches) 2. Compute H 3. Inliers $
+d\left(x_{i n}^{\prime}, H x_{i n}\right)<\varepsilon
+$
+4. Max inliers - prob, 5. Recompute H with all inliers
+\circled{6}\textit{Least Square}
+$
+\mathbb{H}^{*}=\underset{H}{\operatorname{argmin}} \sum_{n}\left(x_{n}^{\prime}-H x_{n}\right)^{2}
+$;Grad descent
+$
+h_{11}^{\text {new }}=h_{11}^{\text {old }}-\left.\eta \frac{\partial E(H)}{\partial h_{11}}\right|_{h_{11}=h_{11}^{\text {ord }}}
+$;
+$
+-2 \sum_{n}^{1}\left(x_{n}^{\prime}-h_{11} x_{n}-h_{12} y_{n}-h_{13}\right) x_{n}
+$
+
+
+\textbf{4. Camera Parameters}
+$
+\bar{x}=\mathbb{P} \bar{X}
+$, both are in homogeneous coord.
+$
+\bar{X}_{c}=\mathbb{T} \mathbb{R} \bar{X}_{w}
+$Xc and Xw just have translation and then rotation - Rotate and translates, otherwise translation will also rotate.\tiny
+$
+\mathbb{R}=\left[\begin{array}{lll}{1} & {0} & {x_{0}} \\ {0} & {1} & {y_{0}} \\ {0} & {0} & {1}\end{array}\right]\left[\begin{array}{lll}{f_{x}} & {0} & {0} \\ {0} & {f_{y}} & {0} \\ {0} & {0} & {1}\end{array}\right]
+$\normalsize
+, K - scale down(lens), xo,yo - translate from centre of image to top left, every image is at Z=1 plane normal to the Z axis. Usually fx = fy (focal length).
+$
+\mathbb{T}\mathbb{R} = \left[\begin{array}{cc}{\mathbb{R}}  & {\bar{t}} \\ {0}  & {1}\end{array}\right]
+$;
+$
+[\mathbb{R} | \vec{t}]\bar{X}_{w}(3X4,4X1)
+$;
+$
+\begin{aligned} \bar{x} &=\mathbb{P} \bar{X}_{w}=\mathbb{K} \bar{X}_{c}=\mathbb{K}[\mathbb{R} | \bar{t}] \bar{X}_{w} \end{aligned}
+$
+K - intrinsic to the camera (calibration etc.), R,t - extrinsic i.e depends on the position of camera etc.
+\circled{1}
+\textit{Forward propagation} - $\bar{x} = \mathbb{P}\bar{X} $; don't forget to normalise $\bar{x} = \bar{x}./\bar{x(3)}$
+\circled{2} \textit{Backward propagation}
+Given a point in image, it corresponds to a ray in real world. Ray passing through camera \textit{center} $\bar{C}=-\mathbb{R}^{-1} \bar{t}$ ($[\mathbb{R}[\bar{t}] \bar{C}=\mathbb{R} \bar{C}+\bar{t}, \mathbb{R}$ is orthonormal)and $\hat{X}_w = \mathbb{P}^{+} \bar{x} = \left(\mathbb{P}^{\top} \mathbb{P}\right)^{-1} \mathbb{P}^{\top} \bar{x}$, P is a 3x4 matrix.
+Hence $
+\bar{X}=\bar{c}+\lambda \mathbb{P}^{+} \bar{x}
+$.
+\textbf{Callibration} Given $\bar{x} \& \bar{X}$-N pairs, estimate K,R,t.$\rightarrow$\circled{1}
+\textit{Compute P}
+$\bar{x} &=\mathbb{P} \bar{X}_{w};
+x_{i}\left(p_{31} x_{\omega}+p_{32} y_{\omega}+p_{33} z_{\omega}+p_{34}\right)=p_{11} x_{\omega}+p_{12} y_{\omega}+p_{13} z_{\omega+} p_{14};
+\mathbb{A}_{D}=\overline{0}; \text{ where, } \bar{p}=\left[p_{11} p_{12} p_{13} p_{44} p_{21} p_{21} p_{33} p_{29} p_{31} p_{32} p_{33} p_{34}\right]^{\top}$; 1 pair - 2 equations $\rightarrow$ atleast 6 pairs, 1. Using SVD, $
+\mathbb{A=UDV^{T}},\bar{p}
+$ is the last  row of $\mathbb{V^{T}}$, for $\mathbb{A}\bar{p}=0$
+2. Further use MLE - Using Newtons method  $\rightarrow$
+$
+x^{\text {new }}=x^{\text {old }}-\alpha \nabla E(x) / \nabla \nabla E(x)=x^{\text {old }}-\alpha \mathbb{H}^{-1}(x) \nabla E(x)
+$;
+$
+P_{11}^{\text {new }}=P_{11}^{\text {old }}-\alpha\sum_{n}\left(x_{n}-P_{11}^{\text {old }} X_{n}-P_{12} Y_{n}-P_{13} Z_{n}-P_{14}\right) X_{n}/-\sum_{n} X_{n}^{2}
+$;
+$
+E(\mathbb{P}) =
+\sum_{n}\left(\left[\begin{array}{c}{x_{n}} \\ {y_{n}} \\ {1}\end{array}\right]-\mathbb{P}\left[\begin{array}{l}{x_{0}} \\ {y_{n}} \\ {z_{n}}\end{array}\right]\right)^{2}
+$, Hessian = \tiny$
+H f(x, y) \equiv\left|\begin{array}{ll}{\frac{\partial^{2} f}{\partial x^{2}}} & {\frac{\partial^{2} f}{\partial x^{2} y}} \\ {\frac{\partial^{2} f}{\partial y \partial x}} & {\frac{\partial^{2} f}{\partial y^{2}}}\end{array}\right|
+$\normalsize, Better - Levenberg method - $x^{\text {new }}=x^{\text {old }}-(\mathbb{H}(x)+\mu \mathbb{I})^{-1} \nabla E(x)$
+\circled{2}\textit{Decompose P to KRt} Extract $\mathbb{M}$ from P, M is a 3x3 submatrix of P; Decompose M to KR, using RQ method; and $
+\bar{t}=\mathbb{K}^{-1}\left(\begin{array}{l}{P_{14}} \\ {P_{24}} \\ {P_{34}}\end{array}\right)
+$, non homogeneous t; Skew - $
+\left[\begin{array}{lll}{1} & {s} & {0} \\ {0} & {1} & {0} \\ {0} & {0} & {1}\end{array}\right]
+$, most cameras s =0, vertical skew is rare. Checkered box - pairs, find corresponding pairs.\\
+\indent \textbf{5. Depth from Stereo} Stereo - horizontally seperated, left and right eye; ${\bar{x}^{\prime}}^{T} \mathbb{F} \bar{x}=0;
+l^{\prime}=\mathbb{F} \bar{x}
+$
+F is a 3x3 matrix with rank 2. Two points create a line through cross product, cross product to matrix is skew symmetric matrix \tiny$
+\left[e^{T}\right]_{X}=\left[\begin{array}{ccc}{0} & {-e_{z}^{\prime}} & {e_{y}^{\prime}} \\ {e_{z}^{\prime}} & {0} & {-e_{x}^{\prime}} \\ {-e_{y}} & {e_{x}^{\prime}} & {0}\end{array}\right]
+$\normalsize; $\bar{l}^{\prime}=\left[e^{\prime}\right]_{x} \mathbb{H} \bar{x} = \mathbb{F}\bar{x}$;
+Now let's derive F from Ps, from previous we know $\mathbb{P}^{+}\bar{x}$ and C for a ray, let's transform the ray into line in image,
+$\mathbb{P}^{+} \bar{x} \rightarrow \mathbb{P}^{‘} \mathbb{P}^{+} \bar{x}$ and $
+\bar{C} \rightarrow \mathbb{P}^{\prime} \bar{C} = \bar{e}^{'}
+$;
+Hence, $
+\bar{l}^{\prime}=\left(\mathbb{P}^{\prime} \bar{c}\right) \times\left(\mathbb{P}^{\prime} \mathbb{P}^{+} \bar{x}\right) =
+\left[\bar{e}^{\prime}\right]_{x} \mathbb{P}^{\prime} \mathbb{P}^{+} \bar{x}
+= \mathbb{F}\bar{x}
+$, hence F is independent of the world or the scene.
+$
+\mathrm{l}=\mathrm{F}^{\top} \mathrm{x}^{\prime} \text { is the epipolar line corresponding to } \mathrm{x}^{\prime}. \text{  }
+\mathrm{Fe}=\mathbf{0}, \mathrm{F}^{\top} \mathbf{e}^{\prime}=\mathbf{0}
+$
+$
+\begin{array}{l}{\diamond \text { Canonical cameras, } \mathrm{P}=[\mathrm{I} | \mathrm{o}], \mathrm{P}^{\prime}=[\mathrm{M} | \mathrm{m}]} \  {\mathrm{F}=\left[\mathrm{e}^{\prime}\right]_{\times} \mathrm{M}=\mathrm{M}^{-\top}[\mathrm{e}]_{\times}, \end{array}$  $\text {where } \mathrm{e}^{\prime}=\mathrm{m} \text { and } \mathrm{e}=\mathrm{M}^{-1} \mathrm{m}}
+$; Rectified image - search along the row.           \\
+\indent\textbf{6. Markov Random Field} - graph expresses conditional dependence structure between rand vars. \textit{Bayes Theorem} - $
+p(x, y)=p(x | y) p(y);
+$ If x,y are independent, $
+p(x | y) = p(x)
+$;
+$
+p(x | d)=\frac{p(d | x) p(x)}{p(d)}\rightarrow$
+$\text { posterior }=\frac{\text { likelihood } \times \text { prior }}{\text { evidence }}$
+; d-obs. data, x -rand var.
+$
+p(d)=\int p(d | x) p(x) d x
+$, in most cases is intractable. $\diamond$ 3 Probabilistic Inference methods -
+\circled{1}
+MLE - max likelihood est. $
+x^{*}=\operatorname{argmax} p(d | x)
+$, return x that maximises $p(d | x)$, Weakness - treats every candidate equally
+\circled{2} MAP - max a posterior - $
+x^{*}=\operatorname{argmax} p(x | d) = \operatorname{argmax} p(x | d)p(x)
+$, since p(d) is indep. of x, can be ignored in  argmax.
+\circled{3}
+Full baysian - not max but direct $p(x|d)$
+\textit{Factorisation} - $\begin{aligned} p\left(x_{1}, x_{2}, x_{3}\right) &=p\left(x_{3} | x_{2}, x_{1}\right)  p\left(x_{2} | x_{1}\right) p\left(x_{1}\right) \end{aligned}$$
+=p\left(x_{3} | x_{2}\right) p\left(x_{2} | x_{1}\right)p(x_1)
+$, if x3 is indep. of x1. Factorisation reduces the complexity of joint prob. computation.
+\circled{1} Directed - $
+p\left(x_{1}, \ldots, x_{N}\right)=\prod_{n} p\left(x_{n} | x_{p a}\left(x_{n}\right)\right)
+; x_{pa}$ are the parent for xn.
+\circled{2} Undirected -
+$
+p\left(x_{1} \ldots x_{N}\right)=\frac{1}{z} \prod_{c} \Phi_{c}\left[x_{1} \ldots x_{N}\right]
+$
+c -set of cliques.
+$
+p(\{x\},\{d\})=\frac{1}{z} \prod_{i} \phi\left[x_{i}, d_{i}\right] \prod_{j \in N_{i}} \phi\left[x_{i}, x_{j}\right] $, to make i minium, we log the whole and $
+\{x\}^{*}=\operatorname{argmin} \sum_{i} f_{d}\left(x_{i}, d_{i}\right)+\sum_{j \in N_{i}} f_{p}\left(x_{i}, x_{j}\right)
+$
+$\diamond$
+\textit{Graphcut} - to implement argmin, the cost of cut = total cost of assignment - data and prior terms sum. The cut is the assignment i.e if x1 & B are but, x1 is assigned to B.
+$\diamond$
+\textit{Belief Propogation} - belief =$ b_{i}\left(x_{i}\right)=k  \phi_{i}\left(x_{i}\right) \prod_{j \in N_{i}} m_{j i}\left(x_{i}\right);$
+messeage = $
+m_{i j}\left(x_{j}\right)=\sum_{x_{i}} \phi{i}\left(x_{i}\right) \psi_{i j}\left(x_{i}, x_{j}\right) \prod_{k \in N_{i} / j} m_{k i}\left(x_{i}\right)
+$ \\
+\indent \textbf{7. Depth from Video}
+$
+D^{*}={\operatorname{argmin}} \sum_{x}\left(f d\left(x_{0}, D(x), {I}, I^{\prime}\right)+\lambda \sum_{y \in N_{x}} f_{P}(D(x), D(y))\right)
+$, $
+f_{d}\left(x, D(x), I, I^{\prime}\right)=\left[I(x)-I^{\prime}(x+D(x))\right]^{2}
+$;
+$
+f_{P}(D(x), D(y))=(D(x)-D(y))^{2}
+$, fp can be made into a matrix. \textit{Unrectified Image} - $
+x^{\prime} \sim \mathbb{K}^{\prime} \mathbb{R}^{\prime} \mathbb{R}^{\top} \mathbb{K}^{-1} x+d \mathbb{K}^{\prime} \mathbb{R}^{\prime}\left(\bar{c}-\bar{c}^{\prime}\right)
+,\rightarrow$ derivation
+$
+x^{h}=\mathbb{K}[\mathbb{R} | \tilde{t}] X_{\infty}=\mathbb{K}[\mathbb{R} | \bar{t}]\left[\begin{array}{c}{\hat{X}_{\infty}} \\ {0}\end{array}\right]=\mathbb{K} \mathbb{R} \hat{X}_{\infty} - \textit{3x3}
+$, hence $
+\hat{X}_{\infty}=\mathbb{R}^{\top} \mathbb{K}^{-1} x^{h}
+$, \hat{X} is not homo.
+$
+x_{\infty}^{h}=\mathbb{P}^{\prime} X_{\infty}=\mathbb{K}^{\prime}\left[\mathbb{R}^{\prime} | \bar{t}^{\prime}\right]\left[\begin{array}{c}{\hat{X}_{\infty}} \\ {0}\end{array}\right]=\mathbb{K}^{\prime} \mathbb{R}^{\prime} \hat{X}_{\infty}
+=\mathbb{K}^{\prime}\mathbb{R}^{\prime} \mathbb{R}^{\top} \mathbb{K}^{-1} x^{h}
+$;
+$
+\vec{e}_{t^{\prime}}=\mathbb{P}^{\prime} \bar{c}_{t}=\mathbb{K}^{\prime}\left[\mathbb{R}^{\prime} | \bar{t}^{\prime}\right] \bar{c}_{t}
+=\mathbb{K}^{\prime} \mathbb{R}^{\prime}\left[\mathbb{I}\left|\left[\mathbb{R}^{\prime}\right]^{-1} \bar{t}^{\prime}\right] \bar{c}_{t}\right.
+=\mathbb{K}^{\prime} \mathbb{R}^{\prime}\left[\bar{C}_{t}-\bar{C}_{t}^{\prime}\right]
+$; $
+\bar{c}_{t^{\prime}}=-\left(\mathbb{R}^{\prime}\right)^{-1} \bar{t}^{\prime}
+$, here C is 3x1 as matrix is converted to addition.
+$
+x^{\prime^{h}} \sim x_{\infty}^{\prime^{h}}+d \bar{e}_{t^{\prime}}
+$, x is in homography cord. If 3 images, $d_{12}=d_{13}$. $
+d_{i}(x, y)=\frac{f_{i} b}{z_{i}(x, y)}
+$ long baseline better - b magnifies, however they suffer from occlusions. \textit{Depth from Video - paper} effectively suppress temporal outliers by use of stat. info from multiple frames. to improve the final recon. qual., used optical flow-find corres. pxls in the subsequent frames of same camera, and enforced temporal consistency in reconstructing successive frames.depth error in conv. stereo methods grows quad with depth, G et al.- multibaseline and multiresolution stereo method-achieve constant depth accuracy-varying baseline and resolution proportionally to depth., maintaining the temporal coherence, surprisingly consistent and accurate dense depth maps obtained.
+\circled{1}\textit{Structure from Motion}
+\circled{2}\textit{Disparity Initialisation}
+$
+L_{i n i t}\left(\mathbf{x}, D_{t}(\mathbf{x})\right)=\sum_{t^{\prime}} p_{c}\left(\mathbf{x}, D_{t}(\mathbf{x}), I_{t}, I_{t^{\prime}}\right)
+;
+p_{c}\left(\mathbf{x}, d, I_{t}, I_{t^{\prime}}\right)={\sigma_{c}}/{\sigma_{c}+\left\|I_{t}(\mathbf{x})-I_{t^{\prime}}\left(l_{t, t^{\prime}}(\mathbf{x}, d)\right)\right\|}
+$;
+$p_{c}$ measures the color similarity.
+$
+E_{d}^{t}\left(D_{t} ; \hat{I}\right)=\sum_{\mathbf{x}} 1-u(\mathbf{x}) \cdot L_{\text {init}}\left(\mathbf{x}, D_{t}(\mathbf{x})\right)
+$;
+$
+u(\mathbf{x})=1 / \max _{D_{t}(\mathbf{x})} L_{i n i t}\left(\mathbf{x}, D_{t}(\mathbf{x})\right)
+$ - adaptive norm. - imposing stronger smoothness constraint in the flat regions than in the textured ones.
+$
+E_{s}\left(D_{t}\right)=\sum_{\mathbf{x}} \sum_{\mathbf{y} \in N(\mathbf{x})} \lambda(\mathbf{x}, \mathbf{y}) \cdot \rho\left(D_{t}(\mathbf{x}), D_{t}(\mathbf{y})\right)
+$; preserve discontinuity, $\lambda(\mathbf{x}, \mathbf{y})$ defined in anisotropic way, encouraging the disparity discon. to be coincident with abrupt intensity/color change.
+$
+\lambda(\mathbf{x}, \mathbf{y})=w_{s} \cdot \frac{u_{\lambda}(\mathbf{x})}{\left\|I_{t}(\mathbf{x})-I_{t}(\mathbf{y})\right\|+\varepsilon}
+$;
+$
+u_{\lambda}(\mathbf{x})=|N(\mathbf{x})| / \sum_{\mathbf{y}^{\prime} \in N(\mathbf{x})} \frac{1}{\left\|I_{t}(\mathbf{x})-I_{t}\left(\mathbf{y}^{\prime}\right)\right\|+\varepsilon}
+$; ws denotes the smoothness strength and e controls the contrast sensitivity. adap. smooth. term imposes smoothness in flat regions while preserving edges in textured ones.
+\circled{3}\textit{Bundle } $
+L(\mathbf{x}, d)=\sum_{t^{\prime}} p_{c}\left(\mathbf{x}, d, I_{t}, I_{t^{\prime}}\right) \cdot p_{v}\left(\mathbf{x}, d, D_{t^{\prime}}\right)
+$; $
+p_{v}\left(\mathbf{x}, d, D_{t}\right)=\exp \left(-\frac{\left\|\mathbf{x}-l_{t}\left(\mathbf{x}^{\prime}, D_{t}\left(\mathbf{x}^{\prime}\right) \|^{2}\right.\right.}{2 \sigma_{d}^{2}}\right)
+$; $
+ E_{i n i t}^{t}\left(D_{t} ; \hat{I}\right)=& \sum_{\mathbf{x}}[1-u(\mathbf{x}) \cdot L_{i n i t}\left(\mathbf{x}, D_{t}(\mathbf{x})\right)+\sum_{\mathbf{y} \in N(\mathbf{x})} \lambda(\mathbf{x}, \mathbf{y}) \cdot \rho\left(D_{t}(\mathbf{x}), D_{t}(\mathbf{y})\right) ]
+$Final data term - $
+E_{d}\left(D_{t} ; \hat{I}, \hat{D} / D_{t}\right)=\sum_{\mathbf{x}} 1-u(\mathbf{x}) \cdot L\left(\mathbf{x}, D_{t}(\mathbf{x})\right)
+$
+\circled{4}\textit{Space time fusion}\\
+\indent \textbf{8. Projective 3D reconstruction}
+Given $
+\bar{x}_{n} \& \bar{x}_{n}^{\prime}
+$, estimate $
+\mathbb{P} , \mathbb{P}^{\prime} \text { and } \bar{X}_{n}
+$. Without knowing P, the  solution is not unique - projective reconstruction. Projective - preserves lines to lines, Afffine - preserves parallel lines, Metric - preserves angle. STEPS $\rightarrow$
+\circled{1}\textit{Compute F} $\bar{x}^{’T} \mathbb{F} \bar{x}=0$;$
+x^{\prime} x f_{11}+x^{\prime} y f_{12}+x^{\prime} f_{13}+y^{\prime} x f_{21}+y^{\prime} y_{f 22}+y^{\prime} f_{23}+x f_{11}+y f_{32}+f_{33}=0
+$; $
+\left[\begin{array}{lllllllll}{x^{\prime} x} & {x^{\prime} y} & {x^{\prime}} & {y^{\prime} x} & {y^{\prime}y} & {y^{\prime}} & {x} & {y} & {1}\end{array}\right]; \mathbb{A}f = 0;
+$ - SVD with atleast 8 pairs.
+\circled{2}\textit{Factor F} After obtaining F(using SVD on A), again we do SVD on F(diff). assume $\mathbb{P}=\mathbb{K}[\mathbb{I} | 0]; \mathbb{P}^{\prime}=\mathbb{K}^{\prime}[\mathbb{R} | \bar{t}]$ - world cord. coincides with first camera.
+$
+\mathbb{F}=\left[\mathbb{P}^{\prime} \bar{c}\right]_{{x}} \mathbb{P}^{\prime} \mathbb{P}^{+}=\left[\mathbb{K}^{\prime}[\mathbb{R} | \bar{t}] \bar{c}\right]_{{x}} \mathbb{K}^{\prime}[\mathbb{R} | \bar{t}][\mathbb{K}[\mathbb{I} | 0]]^{+}
+$;
+$
+\mathbb{P}^{\prime} \bar{c}=\mathbb{K}^{\prime}\left[\mathbb{R}|\bar{t}\right][0001]^{T}=\mathbb{K}^{\prime} \bar{t}
+$;
+$
+\mathbb{P}^{+}=(\mathbb{K}[\mathbb{I} | 0])^{+}=[\mathbb{K}|0]^{+} =
+\left[\frac{\mathbb{K}^{-1}}{0^{\top}}\right]
+$;
+$
+\mathbb{F}=\left[\mathbb{K}^{\prime} \bar{t}\right]_{x} \mathbb{K}^{\prime}[\mathbb{R} | t]\left[\begin{array}{l}{\mathbb{K}^{-1}} \\ {0^{T}}\end{array}\right]=\left[\mathbb{K}^{\prime} \bar{t}\right]_{x} \mathbb{K}^{\prime} \mathbb{R}\mathbb{K}^{-1} =\left[\cup \mathbb{Z}\mathbb{U}^{\top}\right]\left[\mathbb{U} \mathbb{Z}^{\top} \mathbb{D} \mathbb{V}^{\top}\right] = [t]_{x} \mathbb{M}
+$, d33 of $mathbb{D}$ = 0, as F is rank 2. $
+[\bar{z}]_{x} A=A^{*}\left[A^{-1} \bar{z}\right]_{x}=A^{-T}\left[A^{-1} \bar{z}\right]_{x}
+$, where$ A^{*}=\operatorname{det}(A) A^{-T}$; $
+\left[\mathbb{K}^{\prime} \vec{t}\right]_{x} K^{\prime}=[\bar{q}]_{x} \mathbb{K}^{\prime}=(\mathbb{K^{\prime}})^{-\top}\left[\left(\mathbb{K}^{\prime}\right)^{-1} \bar{q}\right]_{x}
+=\left(K^{\prime}\right)^{-T}[\bar{t}]_{x};
+E=[\bar{t}]_{x} \mathbb{R}= \mathbb{SR}
+=\left(\mathbb{U} \mathbb{Z}\mathbb{U}^{\top}\right)\left(\mathbb{U} \mathbb{W} \mathbb{V}^{\top}\right)=\mathbb{U} \mathbb{Z} \mathbb{W} \mathbb{V}^{\top}
+$, Essential matrix is similar to F, with known F, normalised x,y coordinates. Where, \tiny$
+\mathbb{Z}=\left[\begin{array}{ccc}{0} & {1} & {0} \\ {-1} & {0} & {0} \\ {0} & {0} & {0}\end{array}\right]
+$ and $
+W=\left[\begin{array}{ccc}{0} & {-1} & {0} \\ {1} & {0} & {0} \\ {0} & {0} & {1}\end{array}\right]
+$\normalsize , and $
+\mathbb{Z} \mathbb{W} =\operatorname{diag}(1,1,0)
+$
+\circled{3}\textit{Compute P}$\mathbb{P}=[\mathbb{I} | 0]; \mathbb{P}^{\prime}=[\mathbb{M} | \bar{t}]
+$
+\circled{4}\textit{Estimate Xn}
+After representing x,y in terms of X,Y,Z, we get $
+\left(x\left[p_{31}, p_{32}, p_{33}, p_{34}\right]-\left[p_{11}, p_{12}, p_{13}, p_{14}\right]\right)[X Y Z 1]^{T}=0$, hence $[xP_{3}^{T} - P_{1}^{T} ; yP_{3}^{T} -P_{2}^{T};$
+$x'P_{3}^{T} - P_{1}^{T};y'P_{3}^{T} - P_{2}^{T}]^{T}\bar{X}=0$, $\mathbb{A}\bar{X} = 0$; note that we have 3 unknowns but 4 equations for every pair of points. But there  is \textit{ambiguity} $
+\bar{x}=\mathbb{P} \bar{X} = \mathbb{P}\left(\mathbb{H} \mathbb{H}^{-1}\right) \bar{X}
+= (\mathbb{P}\mathbb{H})(\mathbb{H}^{-1} \bar{X}) = \tilde{\mathbb{P}} \tilde{X}
+$;
+\circled{1} Projective to metric recon - compute H s.t $
+\bar{X}_{E, n}=H \bar{X}_{n}
+$, Xn - computed and XEn is the real world points. - use 5 or more points (3 eq. per point), $
+\mathbb{P}_{M}=\mathbb{P} \mathbb{H}^{-1};\bar{X}_{M, n}=\mathbb{H} \bar{X}_{n}; \mathbb{P}_{M}^{\prime}=\mathbb{P}^{\prime} \mathbb{H}^{-1}$ ;
+\circled{2}Structure from motion - Multiview geometry \textit{SLAM-Simultaneous Localisation and mapping} M imgs of N 3D points$\(\left.\bar{X}_{n} \text { (struction }\right)\) and \(P_{m}\) (motion)=Rm, tm, since K is known(self calb.)$;$
+\min _{\mathbb{P}_{m}, \bar{X}_{n}} \sum_{m} \sum_{n} d\left(\mathbb{P}_{m} \bar{X}_{n}, x_{m n}\right)^{2}
+$ Steps- 1. Initialise R,t and structure Xn from 2 img (K is known, self calib.) [2. Compute $\mathbb{P}_{m+1}$ using all the known 3D points (computed in 1) and visible in image. 3. Refine 3D points using triangulation, compute new 3D points] -repeat 4 frames.\\
+\indent \textbf{9. Optical flow}
+$\neq$ Motion flow. \textit{Brightness Constancy Constraint} $
+I(x, y, t)=I(x+u, y+v, t+1)
+$;
+$
+\frac{d I(x, y, t)}{d t}=\frac{d I}{d x} \frac{d x}{d t}+\frac{d I}{d y} \frac{d y}{d t}+\frac{d I}{d t}=0
+$;
+$
+I_{x} u+I_{y} v+I_{t}=0
+$;
+Lucas Kanhade obj. func.  $
+\min E(u, v)=\min \left(I_{x} u+I_{y} v+I_{t}\right)^{2}
+\rightarrow$ dE/du,dE/dv - \tiny$
+\left[\begin{array}{cc}{I_{x}I_{x}} & {I_{x}I_{y}} \\ {I_{y}I_{x}} & {I_{y}I_{y}}\end{array}\right]\left[\begin{array}{l}{u} \\ {v}\end{array}\right]=-\left[\begin{array}{l}{I_{x}I_{t}} \\ {I_{y}I_{t}}\end{array}\right]
+$\normalsize, but det(A) = 0, not invertible, hence we take a patch(same flow inside patch) for the energy function, repeating it $
+\sum_{i, j} I{x_{i, j}}^{2}
+$, even here if the patch doesn't contain texture(edges, corners), then det(A) = 0; So we use guassian kernel over a patch, $
+\left(G *I_{x}^{2}\right)\left(G * I_{y}^{2}\right) \neq\left(G * I_{x} I_{y}\right)^{2}
+$; \textit{Horn Schunk OF-Dense(every pixel) and global} $
+E(u, v)=\left(I_{x} u+I_{y}v+I_{t}\right)^{2}+\alpha^{2}\left(\|\nabla u\|_{2}^{2}+\|\nabla v\|_{2}^{2}\right)
+$;\tiny$
+\nabla u(x, y)=\left(\frac{\partial u}{\partial x}, \frac{\partial u}{\partial y}\right)^{T}=\left(u_{x}, u_{y}\right)^{T}
+$;\normalsize$
+\|\nabla u\|_{2}=\sqrt{u_{x}^{2}+u_{y}^{2}}
+$; Global obj. function $
+\int E(u, v) d x d y=0
+$, we need to find u(x,y) for every pixel. This can be solved using \textit{Euler Lagrange eq.}
+If $
+J=\int F\left(t, \bar{y}, \bar{y}^{\prime}\right) d t
+$, J will have a stationary point if $
+\frac{\partial F}{\partial {y}}-\frac{\partial}{\partial t}\left(\frac{\partial F}{\partial y^{\prime}}\right)=0
+$; Using this, $
+\frac{\partial E}{\partial u}-\frac{\partial}{\partial x} \frac{\partial E}{\partial U_{x}}-\frac{\partial}{\partial y} \frac{\partial E}{\partial U_{y}}=0
+$;
+\tiny$
+\frac{\partial}{\partial x}\left(\frac{\partial E}{\partial u_{x}}\right)=\frac{\partial}{\partial x}\left(\frac{\partial\alpha^{2}\left[\sqrt{u_{x}^{2}+u_{y}^{2}}\right]^{2}}{\partial u_{x}}\right)=\frac{\partial}{\partial x}\left(2 \alpha^{2} U_{x}\right)=2 \alpha^{2} U_{x x}
+$\normalsize
+;$
+\triangle U = U_{xx} + U_{yy}
+$, hence
+$
+2(I_{x} u+I_{y} v+I_{t})I_{x}-2 \alpha^{2} \Delta u=0;
+2(I_{x} u+I_{y} v+I_{t})I_{y}-2 \alpha^{2} \Delta v=0; U_{xx} = \left(u_{i-1}+u_{i+1}\right)-2 u_{i};
+$ Let $\Delta U=\bar{u}-u, \bar{u}$ is average at i,i+1.
+\tiny $
+\left[\begin{array}{cc}{\alpha^{2}+{I}_{x}^{2}} & {I_{x} I_{y}} \\ {I_{x} I_{y}} & {\alpha^{2}+I_{y}^{2}}\end{array}\right][uv]^{T} =
+\left[\begin{array}{l}{\alpha^{2} \bar{u}-I_{x} I_{t}} \\ {\alpha^{2} \bar{v}-I_{y}I_{t}}\end{array}\right]
+$ \normalsize;
+$
+\mathbb{A} \bar{\omega}=\bar{b};
+$(2Nx2N).(2Nx1)=(2Nx1); This can be expanded for N pixel(i,j),
+$
+\left[\begin{array}{cc}{\alpha^{2}+I_{x_{i j}}^{2}} & {I_{x_{i j}} I_{y_{i j}}} \\ {I_{x_{i j}}I_{y_{i j}}} & {\alpha^{2}+I_{y_{i j}}^{2}} \end{array}\right]\left[\begin{array}{c}{u_{i_{j}}} \\ {v_{i j}}\end{array}\right]=\left[\begin{array}{c}{\alpha^{2}\bar{u}_{i j}-I_{x_{i j}} I_{t_{i j}}} \\ {\alpha^{2} \bar{v}_{i j}-I_{y_{i j}} I_{t_{ i j}}}\end{array}\right]
+$;here $det(\mathbb{A})
+=\alpha^{2}\left(\alpha^{2}+I_{x_{ij}}^{2}+I_{y_{i j}}^{2}\right)
+$;
+$
+(\alpha^{2}+I_{x_{ij}}^{2}+I_y_{i j}^{2})      \left[\begin{array}{c}{u_{i j}-\bar{u}_{i j}} \\ {v_{i j}-\bar{v}_{i j}}\end{array}\right]=\left[\begin{array}{c}{-I_{x_{i j}}(I_{x_{i j}} \bar{u}_{{ij}}+I_y_{ ij}\bar{v}_{ij}+I_{t_{i j}})} \\ {-I_{y _{i j}}(I_{x _{i j}} \bar{u}_{i j}+I_y_{i j} \bar{v}_{i j}+I_{t_{ i j}}}\end{array}\right]
+$; $
+u_{i j}^{n e w}=\bar{u}_{i j}^{o l d} - ...
+$. Since $\(A=\left(\begin{array}{ll}{a} & {b} \\ {c} & {d}\end{array}\right)\);$
+$
+A^{-1}=\frac{1}{\operatorname{det}(A)}\left(\begin{array}{rr}{d} & {-b} \\ {-c} & {a}\end{array}\right)
+$
+ \textit{Robust} - Coarse to fine(original HS doesn't work for large disp or motion), easy to init $u_{ij}$, interpolate, median, GCC($
+\nabla I(x, y, t)=\nabla I(x+u, y+v, t+1) ; E= E+
+\delta\left\|\begin{array}{l}{I_{x x} u+I_{x y} v_{f} I_{x t}} \\ {I_{y x} u+I_{y y} v_{f} I_{y t}}\end{array}\right\|^{2}
+$$
+\left[\begin{array}{l}{\frac{\partial I}{\partial x}(x, y, t)} \\ {\frac{\partial}{\partial y}(x, y, t)}\end{array}\right]=\left[\begin{array}{l}{\frac{\partial I}{\partial x}(x+u, y+v, t+1)} \\ {\frac{\partial I}{\partial y}(x+u, y+v, t+1)}\end{array}\right]
+$$
+$) ;
+1. Robust obj. function 2. Coarse to fine 3. Interpolation 4. Median Filtering 5. Pre processing 6. GCC;
+when u suffers from noise, penalty is very high, hence trunkte it, more robust functions -
+Lorents($\log \left(1+\frac{1}{2}\left(\frac{x}{\sigma}\right)^{2}\right)$);
+Charbonnier$
+f(x)=\left(x^{2}+\varepsilon^{2}\right)^{a}
+$; 1.Img pyramid2. OF at coarse 3.warp up
+
+ \textbf{Structure decomp.} Texture is indep from light changes.$
+\min _{I_{S}} \sum_{\bar{x}}\left(I_{s}(\bar{x})-I(\bar{x})\right)^{2}+\lambda\left|\nabla I_{S}(\bar{x})\right|_{2}
+$, Global cost $
+J=\iint E\left(I_{s}\right) d x d y
+$; using Euler-Lag. $
+\nabla J=\frac{\partial E}{\partial I_{S}}-\frac{\partial}{\partial x} \frac{\partial E}{\partial I_{S x}}-\frac{\partial}{\partial y} \frac{\partial E}{\partial I_{S y}}=0
+$; $
+\frac{\partial E}{\partial T_{S}}=2\left(I_{S}(\bar{x})-I(\bar{x})\right)
+$;$
+\frac{\partial E}{\partial I_{s_{x}}}=\frac{\lambda}{2}\left(\frac{2 I_{s x}}{\sqrt{I_{s x}^{2}+I_{s y}^{2}}}\right)
+$;$
+I_{\delta}^{n e w}=I_{s}^{o l d}-\left.\alpha \nabla J\left(I_{s}\right)\right|_{I_{s}=I_{s}^{o l d}}
+$, L2 norm generates blurry edge. \circled{0}-\circled{0} vs \square-\circled{0}; If \(\left(I_{s x},  { I_{sy}}\right)\) are mostly zero (sparse) r the values of Is is sharp. L1
+\end{document}
+
+
+% Total lines available = 60
